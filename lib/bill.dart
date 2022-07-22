@@ -92,6 +92,7 @@ class _BillState extends State<Bill> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var pannumber = prefs.getString("Companypan");
+    var branchnumber = prefs.getString("branchno");
     // Directory tempdir = await getTemporaryDirectory();
     // String temppath = tempdir.path;
     pdf.addPage(pw.Page(
