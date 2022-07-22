@@ -20,8 +20,7 @@ class _PricesetState extends State<Priceset> {
     "diedisplay": "",
     "Companypan": "",
     "displaypan": "",
-    // "branch": "",
-    // "displaybran": ""
+    "displaybran": ""
   };
 
   // double? price;
@@ -29,15 +28,13 @@ class _PricesetState extends State<Priceset> {
   void saveAndUpdate() async {
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
-      print("form is valid");
-      print("petrol" + data['price']);
 
       //shared prefs
       final SharedPreferences prefs = await SharedPreferences.getInstance();
 
       await prefs.setString("petrol", data['price']);
 
-      data['displayPrice'] = prefs.getString('petrol')!;
+      data['displayPrice'] = prefs.getString('petrol') ?? 0;
 
       setState(() {});
 
@@ -58,7 +55,7 @@ class _PricesetState extends State<Priceset> {
 
       await prefs.setString("die", data['die']);
 
-      data['diedisplay'] = prefs.getString('die')!;
+      data['diedisplay'] = prefs.getString('die') ?? 0;
 
       setState(() {});
 
@@ -79,7 +76,7 @@ class _PricesetState extends State<Priceset> {
 
       await prefs.setString("Companypan", data['Companypan']);
 
-      data['displaypan'] = prefs.getString('Companypan')!;
+      data['displaypan'] = prefs.getString('Companypan') ?? '0';
 
       setState(() {});
 
@@ -89,37 +86,33 @@ class _PricesetState extends State<Priceset> {
     }
   }
 
-  // void saveAndUpdatebran() async {
-  //   if (formKey.currentState!.validate()) {
-  //     formKey.currentState!.save();
-  //     print("form is valid");
-  //     print("branch" + data['branch']);
+  void saveAndUpdatebran() async {
+    if (formKey.currentState!.validate()) {
+      formKey.currentState!.save();
 
-  //     //shared prefs
-  //     final SharedPreferences prefs = await SharedPreferences.getInstance();
+      //shared prefs
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  //     await prefs.setString("branch", data['branch']);
+      await prefs.setString("displaybran", data['displaybran']);
 
-  //     data['displaybran'] = prefs.getString('branch')!;
+      data['displaybran'] = prefs.getString('displaybran') ?? '';
+      print(prefs.getString("displaybran"));
 
-  //     setState(() {});
+      setState(() {});
 
-  //     print(prefs.getString("branch"));
-
-  //     Navigator.of(context).pop();
-  //   }
-  // }
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   void didChangeDependencies() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    data["displayPrice"] = prefs.getString("petrol");
-    data["diedisplay"] = prefs.getString("die");
-    data["displaypan"] = prefs.getString("Companypan");
-    data["displaybran"] = prefs.getString("branch");
+    data["displayPrice"] = prefs.getString("petrol") ?? '0';
+    data["diedisplay"] = prefs.getString("die") ?? '0';
+    data["displaypan"] = prefs.getString("Companypan") ?? '0';
+    data["displaybran"] = prefs.getString("displaybran") ?? '';
 
-    setState(() {});
     super.didChangeDependencies();
   }
 
@@ -254,47 +247,47 @@ class _PricesetState extends State<Priceset> {
                     }),
                 icon: Icon(Icons.edit)),
           ),
-          // ListTile(
-          //   title: Text('Company pan'),
-          //   subtitle: Text(data['displaybran']),
-          //   trailing: IconButton(
-          //       onPressed: () => showModalBottomSheet(
-          //           context: context,
-          //           builder: (context) {
-          //             return Container(
-          //               height: 500,
-          //               child: Padding(
-          //                 padding: EdgeInsets.all(20),
-          //                 child: Form(
-          //                   key: formKey,
-          //                   child: Column(
-          //                     children: [
-          //                       TextFormField(
-          //                         onSaved: (value) {
-          //                           data['branch'] = value;
-          //                         },
-          //                         decoration: InputDecoration(
-          //                             border: OutlineInputBorder()),
-          //                       ),
-          //                       SizedBox(
-          //                         height: 10,
-          //                       ),
-          //                       ElevatedButton(
-          //                         onPressed: () async {
-          //                           setState(() {
-          //                             saveAndUpdatebran();
-          //                           });
-          //                         },
-          //                         child: Text("Update"),
-          //                       ),
-          //                     ],
-          //                   ),
-          //                 ),
-          //               ),
-          //             );
-          //           }),
-          //       icon: Icon(Icons.edit)),
-          // ),
+          ListTile(
+            title: Text('Branch Number'),
+            subtitle: Text(data['displaybran']),
+            trailing: IconButton(
+                onPressed: () => showModalBottomSheet(
+                    context: context,
+                    builder: (context) {
+                      return Container(
+                        height: 500,
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Form(
+                            key: formKey,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  onSaved: (value) {
+                                    data['displaybran'] = value;
+                                  },
+                                  decoration: InputDecoration(
+                                      border: OutlineInputBorder()),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    setState(() {
+                                      saveAndUpdatebran();
+                                    });
+                                  },
+                                  child: Text("Update"),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                icon: Icon(Icons.edit)),
+          ),
         ],
       ),
     );

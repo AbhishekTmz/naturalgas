@@ -23,7 +23,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
 
     var diePrice = prefs.getString("die");
 
-    ptrprice = double.parse(diePrice!);
+    ptrprice = double.parse(diePrice ?? "0");
     setState(() {
       if (btnvalue == 'C') {
         texttodisplay = "";
@@ -37,8 +37,9 @@ class _DieselCalculationsState extends State<DieselCalculations> {
         if (texttodisplay == "") {
           littodisplay = '';
         } else {
-          littodisplay = (double.parse(texttodisplay) * double.parse(diePrice))
-              .toStringAsFixed(2);
+          littodisplay =
+              (double.parse(texttodisplay) * double.parse(diePrice ?? "0"))
+                  .toStringAsFixed(2);
         }
       }
     });
@@ -68,7 +69,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
           backgroundColor: Colors.teal,
           title: Text(widget.title),
         ),
-        body: Column(children: [
+        body: ListView(children: [
           Container(
             padding: const EdgeInsets.only(top: 60),
             margin: const EdgeInsets.only(top: 10),
@@ -165,8 +166,8 @@ class _DieselCalculationsState extends State<DieselCalculations> {
                                       Navigator.of(context).push(
                                           MaterialPageRoute(builder: (context) {
                                         return Bill(
-                                          quantity: littodisplay,
-                                          totalPrice: texttodisplay,
+                                          quantity: texttodisplay,
+                                          totalPrice: littodisplay,
                                           rate: ptrprice!,
                                           title: widget.title,
                                         );

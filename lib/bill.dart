@@ -61,6 +61,7 @@
 //   }
 // }
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -68,6 +69,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart' as intl;
 
 class Bill extends StatefulWidget {
   const Bill(
@@ -86,13 +89,43 @@ class Bill extends StatefulWidget {
 }
 
 class _BillState extends State<Bill> {
+  @override
+  void initState() {
+    super.initState();
+    postApi();
+  }
+
+  postApi() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    var pannumber = prefs.getString("Companypan") ?? '';
+    var branchnumber = prefs.getString("displaybran") ?? '';
+    var headers = {'Content-Type': 'application/json'};
+    var request =
+        http.Request('POST', Uri.parse('http://103.90.86.196:89/api/Mater'));
+    var date = intl.DateFormat('yyyy-MM-dd').format(DateTime.now());
+    var x = (0.247 * double.parse(widget.totalPrice));
+    var vat = double.parse(widget.totalPrice) + x;
+    request.body = json.encode(
+        "Company_Pan:$pannumber,Branch_Code:$branchnumber,BillNo:S0-00003,Bill_dateTime:$date,Product:MS-PETROL,Qty:${widget.quantity},Rate:${widget.rate},Amount:${widget.totalPrice},Discount:0,Vat:24.7,NetAmt:$vat");
+    request.headers.addAll(headers);
+
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
+
   final pdf = pw.Document();
 
   pdfCreation() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    var pannumber = prefs.getString("Companypan");
-    var branchnumber = prefs.getString("branchno");
+    var x = (0.247 * double.parse(widget.totalPrice));
+    var vat = double.parse(widget.totalPrice) + x;
+    var pannumber = prefs.getString("Companypan") ?? '';
+    var branchnumber = prefs.getString("displaybran") ?? '';
+    var date = intl.DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
     // Directory tempdir = await getTemporaryDirectory();
     // String temppath = tempdir.path;
     pdf.addPage(pw.Page(
@@ -105,7 +138,7 @@ class _BillState extends State<Bill> {
                   pw.Container(
                     width: 400,
                     child: pw.Text(
-                      'BARAL OIL DISTRIBUTORS P .LTD \n  POKHARA - 7 \n PAN : ${pannumber} \n PH : 061-528245 \n Tax Invoice',
+                      'BARAL OIL DISTRIBUTORS P .LTD \n  POKHARA - 7 \n PAN : ${pannumber} \n PH : 061-528245 \n Tax Invoice \n Branch : ${branchnumber}',
                       textAlign: pw.TextAlign.center,
                     ),
                   ),
@@ -146,8 +179,8 @@ class _BillState extends State<Bill> {
                       mainAxisAlignment: pw.MainAxisAlignment.end,
                       children: [
                         pw.Text('TAXABLE'),
-                        pw.Text('Tax(13%): 57.55 '),
-                        pw.Text('Grand Total : ${widget.totalPrice}'),
+                        pw.Text('Vat(24.7%): $x '),
+                        pw.Text('Grand Total : ${vat}'),
                         pw.Text('Chnage : 0.00')
                       ],
                     ),
@@ -157,8 +190,8 @@ class _BillState extends State<Bill> {
                     style: const pw.TextStyle(fontSize: 20),
                   ),
                   pw.Text('** NOTE'),
-                  pw.Text('User : 101'),
-                  pw.Text('Print time : 1:40'),
+                  // pw.Text('User : 101'),
+                  pw.Text('Print time : $date'),
                   pw.SizedBox(height: 10),
                   pw.Text('Visit Again , Thank You ')
                 ]),
