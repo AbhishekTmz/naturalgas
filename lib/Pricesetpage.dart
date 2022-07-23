@@ -23,6 +23,22 @@ class _PricesetState extends State<Priceset> {
     "displaybran": ""
   };
 
+  @override
+  void initState() {
+    super.initState();
+    getSharedPrefData();
+  }
+
+  getSharedPrefData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      data["displayPrice"] = prefs.getString("petrol") ?? '0';
+      data["diedisplay"] = prefs.getString("die") ?? '0';
+      data["displaypan"] = prefs.getString("Companypan") ?? '0';
+      data["displaybran"] = prefs.getString("displaybran") ?? '';
+    });
+  }
+
   // double? price;
 
   void saveAndUpdate() async {
@@ -105,22 +121,11 @@ class _PricesetState extends State<Priceset> {
   }
 
   @override
-  void didChangeDependencies() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    data["displayPrice"] = prefs.getString("petrol") ?? '0';
-    data["diedisplay"] = prefs.getString("die") ?? '0';
-    data["displaypan"] = prefs.getString("Companypan") ?? '0';
-    data["displaybran"] = prefs.getString("displaybran") ?? '';
-
-    super.didChangeDependencies();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Settings'),
+        backgroundColor: Colors.teal,
       ),
       body: Column(
         children: [
@@ -143,6 +148,7 @@ class _PricesetState extends State<Priceset> {
                                   onSaved: (value) {
                                     data['price'] = value;
                                   },
+                                  initialValue: data['price'],
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder()),
                                 ),
@@ -184,6 +190,7 @@ class _PricesetState extends State<Priceset> {
                                   onSaved: (value) {
                                     data['die'] = value;
                                   },
+                                  initialValue: data['die'],
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder()),
                                 ),
@@ -225,6 +232,7 @@ class _PricesetState extends State<Priceset> {
                                   onSaved: (value) {
                                     data['Companypan'] = value;
                                   },
+                                  initialValue: data['Companypan'],
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder()),
                                 ),
@@ -266,6 +274,7 @@ class _PricesetState extends State<Priceset> {
                                   onSaved: (value) {
                                     data['displaybran'] = value;
                                   },
+                                  initialValue: data['displaybran'],
                                   decoration: InputDecoration(
                                       border: OutlineInputBorder()),
                                 ),

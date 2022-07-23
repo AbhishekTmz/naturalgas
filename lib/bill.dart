@@ -95,10 +95,16 @@ class _BillState extends State<Bill> {
     postApi();
   }
 
+  int billNumber = 000000;
+
   postApi() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     var pannumber = prefs.getString("Companypan") ?? '';
     var branchnumber = prefs.getString("displaybran") ?? '';
+    setState(() {
+      billNumber = int.parse(prefs.getString("billNumber") ?? '000000');
+      billNumber++;
+    });
     var headers = {'Content-Type': 'application/json'};
     var request =
         http.Request('POST', Uri.parse('http://103.90.86.196:89/api/Mater'));
@@ -106,12 +112,12 @@ class _BillState extends State<Bill> {
     var x = (0.247 * double.parse(widget.totalPrice));
     var vat = double.parse(widget.totalPrice) + x;
     request.body = json.encode(
-        "Company_Pan:$pannumber,Branch_Code:$branchnumber,BillNo:S0-00003,Bill_dateTime:$date,Product:MS-PETROL,Qty:${widget.quantity},Rate:${widget.rate},Amount:${widget.totalPrice},Discount:0,Vat:24.7,NetAmt:$vat");
+        "Company_Pan:$pannumber,Branch_Code:$branchnumber,BillNo:S0-$billNumber,Bill_dateTime:$date,Product:MS-PETROL,Qty:${widget.quantity},Rate:${widget.rate},Amount:${widget.totalPrice},Discount:0,Vat:24.7,NetAmt:$vat");
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
+      prefs.setString('billNumber', '$billNumber');
     } else {
       print(response.reasonPhrase);
     }
@@ -143,7 +149,7 @@ class _BillState extends State<Bill> {
                     ),
                   ),
                   pw.Text(
-                    'Bill no : VAT,  \n Mode : Cash',
+                    'Bill no : $billNumber,  \n Mode : Cash',
                     textAlign: pw.TextAlign.left,
                   ),
                   pw.Text(

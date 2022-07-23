@@ -13,42 +13,61 @@ class DieselCalculations extends StatefulWidget {
 class _DieselCalculationsState extends State<DieselCalculations> {
   int? firstnum;
   int? secondnum;
-  String texttodisplay = "";
-  String? res;
-  String littodisplay = "";
   double? ptrprice;
+  String dropdownvalue = 'Liter';
+  String? userInput;
+  String? result;
+  int dotCount = 0;
+  // List of items in our dropdown menu
+  var items = [
+    'Liter',
+    'Price',
+  ];
+
+  clearField() {
+    setState(() {
+      firstnum = 0;
+      secondnum = 0;
+      userInput = '';
+      result = '';
+      dotCount = 0;
+    });
+  }
 
   void btnclicked(String btnvalue) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    var diePrice = prefs.getString("die");
+    var diePrice = prefs.getString("die") ?? '0';
+    ptrprice = double.parse(diePrice);
 
-    ptrprice = double.parse(diePrice ?? "0");
-    setState(() {
-      if (btnvalue == 'C') {
-        texttodisplay = "";
-        littodisplay = "";
-        firstnum = 0;
-        secondnum = 0;
-        res = "";
-      } else {
-        res = int.parse(texttodisplay + btnvalue).toString();
-        texttodisplay = res.toString();
-        if (texttodisplay == "") {
-          littodisplay = '';
-        } else {
-          littodisplay =
-              (double.parse(texttodisplay) * double.parse(diePrice ?? "0"))
-                  .toStringAsFixed(2);
+    if (btnvalue == 'C') {
+      clearField();
+    } else {
+      setState(() {
+        if (btnvalue == '.') {
+          dotCount++;
         }
-      }
-    });
+        if (btnvalue == '.' && dotCount > 1) {
+        } else {
+          userInput = (userInput ?? '') + btnvalue;
+          if (userInput == "") {
+            result = '';
+          } else {
+            result = dropdownvalue == items[0]
+                ? (double.parse(userInput ?? '0') * double.parse(diePrice))
+                    .toStringAsFixed(2)
+                : (double.parse(userInput ?? '0') / double.parse(diePrice))
+                    .toStringAsFixed(2);
+          }
+        }
+      });
+    }
   }
 
   Widget custombutton(String btnvalue) {
     return Expanded(
         child: Container(
-      margin: const EdgeInsets.only(bottom: 20),
+      margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(5),
       height: 70,
       child: OutlinedButton(
@@ -70,47 +89,75 @@ class _DieselCalculationsState extends State<DieselCalculations> {
         appBar: AppBar(
           backgroundColor: Colors.teal,
           title: Text(widget.title),
+          actions: [
+            DropdownButton(
+              value: dropdownvalue,
+              icon: const Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.white,
+              ),
+              dropdownColor: Colors.teal,
+              items: items.map((String items) {
+                return DropdownMenuItem(
+                  value: items,
+                  child: Text(
+                    items,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                setState(() {
+                  dropdownvalue = newValue!;
+                });
+                clearField();
+              },
+            ),
+            SizedBox(
+              width: 10,
+            )
+          ],
         ),
         body: ListView(children: [
           Container(
             padding: const EdgeInsets.only(top: 60),
-            margin: const EdgeInsets.only(top: 10),
+            margin: const EdgeInsets.only(top: 10, right: 5),
             height: 80,
             width: 320,
             child: Text(
-              ' Rs $littodisplay',
+              dropdownvalue == items[0]
+                  ? '${(userInput ?? '')} Ltr'
+                  : 'Rs.${(userInput ?? '')} ',
               textAlign: TextAlign.right,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
           ),
           SizedBox(
-            height: 400,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Row(children: [
-                  custombutton('9'),
-                  custombutton('8'),
-                  custombutton('7'),
-                ]),
-                Row(children: [
-                  custombutton('6'),
-                  custombutton('5'),
-                  custombutton('4'),
-                ]),
-                Row(children: [
-                  custombutton('3'),
-                  custombutton('2'),
-                  custombutton('1'),
-                ]),
-                Row(children: [
-                  custombutton('C'),
-                  custombutton('0'),
-                  custombutton('.'),
-                ]),
-              ],
-            ),
+            height: 20,
           ),
+          Row(children: [
+            custombutton('9'),
+            custombutton('8'),
+            custombutton('7'),
+          ]),
+          Row(children: [
+            custombutton('6'),
+            custombutton('5'),
+            custombutton('4'),
+          ]),
+          Row(children: [
+            custombutton('3'),
+            custombutton('2'),
+            custombutton('1'),
+          ]),
+          Row(children: [
+            custombutton('C'),
+            custombutton('0'),
+            custombutton('.'),
+          ]),
           const SizedBox(
             height: 15,
           ),
@@ -120,7 +167,9 @@ class _DieselCalculationsState extends State<DieselCalculations> {
             height: 60,
             width: 300,
             child: Text(
-              '$texttodisplay ltr',
+              dropdownvalue == items[0]
+                  ? 'Rs. ${(result ?? '')}'
+                  : '${(result ?? '')} Ltr',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
             ),
@@ -135,11 +184,9 @@ class _DieselCalculationsState extends State<DieselCalculations> {
                       title: Column(
                         children: [
                           Text(
-                            'Total Quantity - $texttodisplay',
-                            style: TextStyle(fontWeight: FontWeight.w400),
-                          ),
-                          Text('Amount - $littodisplay',
-                              style: TextStyle(fontWeight: FontWeight.w400)),
+                              'Total Quantity - ${dropdownvalue == items[0] ? (userInput ?? '') : (result ?? '')} Ltr'),
+                          Text(
+                              'Amount - Rs. ${dropdownvalue == items[0] ? (result ?? '') : (userInput ?? '')}'),
                           Text('----------------------------------'),
                           const SizedBox(
                             height: 5,
@@ -173,12 +220,18 @@ class _DieselCalculationsState extends State<DieselCalculations> {
                                         color: Colors.teal),
                                     child: TextButton(
                                       onPressed: () {
+                                        Navigator.of(context).pop();
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) {
                                           return Bill(
-                                            quantity: texttodisplay,
-                                            totalPrice: littodisplay,
+                                            quantity: dropdownvalue == items[0]
+                                                ? (userInput ?? '')
+                                                : (result ?? ''),
+                                            totalPrice:
+                                                dropdownvalue == items[0]
+                                                    ? (result ?? '')
+                                                    : (userInput ?? ''),
                                             rate: ptrprice!,
                                             title: widget.title,
                                           );
@@ -194,11 +247,10 @@ class _DieselCalculationsState extends State<DieselCalculations> {
                       ),
                     )),
             child: Container(
-              padding: const EdgeInsets.only(top: 5),
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 20.0),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10), color: Colors.teal),
-              height: 40,
-              width: 100,
               child: const Text(
                 'Print',
                 style: TextStyle(fontSize: 20, color: Colors.white),
