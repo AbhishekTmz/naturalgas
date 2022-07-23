@@ -51,10 +51,12 @@ class _FuelcalcusState extends State<Fuelcalcu> {
       padding: const EdgeInsets.all(5),
       height: 70,
       child: OutlinedButton(
+        style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(Colors.teal)),
         onPressed: () => btnclicked(btnvalue),
         child: Text(
           btnvalue,
-          style: const TextStyle(fontSize: 20),
+          style: const TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
     ));
@@ -134,55 +136,61 @@ class _FuelcalcusState extends State<Fuelcalcu> {
                   builder: (context) => AlertDialog(
                         title: Column(
                           children: [
-                            Text('Total Quantity - $littodisplay Ltr'),
-                            Text('Total Amount - $texttodisplay'),
+                            Text('Total Quantity - $texttodisplay Ltr'),
+                            Text('Amount - $littodisplay'),
+                            Text('----------------------------------'),
                             const SizedBox(
-                              height: 20,
+                              height: 5,
                             ),
-                            const Text('Do you want to proceed?')
+                            const Text(
+                              'Do you really want to proceed?',
+                              textAlign: TextAlign.center,
+                            ),
+                            Text('----------------------------------'),
+                            Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          color: Colors.red.shade500),
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text(
+                                          'Cancel',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      )),
+                                  Container(
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          color: Colors.teal),
+                                      child: TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) {
+                                            return Bill(
+                                              quantity: texttodisplay,
+                                              totalPrice: littodisplay,
+                                              rate: ptrprice,
+                                              title: widget.title,
+                                            );
+                                          }));
+                                        },
+                                        child: const Text(
+                                          'Print',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      )),
+                                ])
                           ],
                         ),
-                        actions: [
-                          Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              children: [
-                                Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Colors.red.shade500),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text(
-                                        'Back',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    )),
-                                Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Colors.teal),
-                                    child: TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return Bill(
-                                            quantity: texttodisplay,
-                                            totalPrice: littodisplay,
-                                            rate: ptrprice,
-                                            title: widget.title,
-                                          );
-                                        }));
-                                      },
-                                      child: const Text(
-                                        'Print',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    )),
-                              ])
-                        ],
                       )),
               child: Container(
                 padding: const EdgeInsets.only(top: 5),

@@ -143,7 +143,7 @@ class _BillState extends State<Bill> {
                     ),
                   ),
                   pw.Text(
-                    'Bill no : VAT, \n Date : 2079/1/4 \n Mode : Cash',
+                    'Bill no : VAT,  \n Mode : Cash',
                     textAlign: pw.TextAlign.left,
                   ),
                   pw.Text(
@@ -172,9 +172,9 @@ class _BillState extends State<Bill> {
                       pw.Text(widget.totalPrice),
                     ],
                   ),
-                  pw.SizedBox(height: 30),
+                  pw.SizedBox(height: 20),
                   pw.Container(
-                    padding: const pw.EdgeInsets.only(left: 100),
+                    padding: const pw.EdgeInsets.only(left: 80),
                     child: pw.Column(
                       mainAxisAlignment: pw.MainAxisAlignment.end,
                       children: [
