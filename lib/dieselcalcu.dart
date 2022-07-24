@@ -119,18 +119,21 @@ class _DieselCalculationsState extends State<DieselCalculations> {
             bold: true));
     await SunmiPrinter.line();
     await SunmiPrinter.printRow(cols: [
-      ColumnMaker(text: 'Item', align: SunmiPrintAlign.LEFT),
-      ColumnMaker(text: 'Qty', align: SunmiPrintAlign.CENTER),
-      ColumnMaker(text: 'Rate', align: SunmiPrintAlign.CENTER),
-      ColumnMaker(text: 'Amount', align: SunmiPrintAlign.RIGHT),
+      ColumnMaker(
+        text: 'Item',
+        width: 6,
+      ),
+      ColumnMaker(text: 'Qty', width: 6),
+      ColumnMaker(text: 'Rate', width: 6),
+      ColumnMaker(text: 'Amount', width: 6),
     ]);
 
     await SunmiPrinter.line();
     await SunmiPrinter.printRow(cols: [
-      ColumnMaker(text: title, align: SunmiPrintAlign.LEFT),
-      ColumnMaker(text: '${quantity}L', align: SunmiPrintAlign.CENTER),
-      ColumnMaker(text: '${rate}/L', align: SunmiPrintAlign.CENTER),
-      ColumnMaker(text: x.toStringAsFixed(2), align: SunmiPrintAlign.RIGHT),
+      ColumnMaker(text: title, width: 6),
+      ColumnMaker(text: '${quantity}L', width: 6),
+      ColumnMaker(text: '${rate}/L', width: 6),
+      ColumnMaker(text: x.toStringAsFixed(2), width: 6),
     ]);
     await SunmiPrinter.printText('TAXABLE',
         style: SunmiStyle(
