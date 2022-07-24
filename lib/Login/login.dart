@@ -87,8 +87,8 @@ class Login extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                      color: Colors.green.shade600,
-                      borderRadius: BorderRadius.circular(20)),
+                      color: Color.fromARGB(255, 0, 125, 94),
+                      borderRadius: BorderRadius.circular(10)),
                   height: 50,
                   width: 150,
                   child: const Text(

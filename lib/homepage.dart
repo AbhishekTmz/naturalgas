@@ -71,7 +71,7 @@ class Homepage extends StatelessWidget {
                     onTap: () => Navigator.of(context)
                         .push(MaterialPageRoute(builder: (context) {
                       return const Fuelcalcu(
-                        title: "Fuel",
+                        title: "",
                       );
                     })),
                     child: SizedBox(
@@ -82,7 +82,7 @@ class Homepage extends StatelessWidget {
                         const SizedBox(
                           height: 15,
                         ),
-                        const Text('FILL FUEL',
+                        const Text('FILL PETROL',
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w400)),
                       ]),

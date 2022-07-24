@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:naturalgas/bill.dart';
+import 'package:intl/intl.dart' as intl;
+import 'package:naturalgas/post_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sunmi_printer_plus/column_maker.dart';
+import 'package:sunmi_printer_plus/enums.dart';
+import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
+import 'package:sunmi_printer_plus/sunmi_style.dart';
 
 class DieselCalculations extends StatefulWidget {
   const DieselCalculations({Key? key, required this.title}) : super(key: key);
@@ -11,6 +16,8 @@ class DieselCalculations extends StatefulWidget {
 }
 
 class _DieselCalculationsState extends State<DieselCalculations> {
+  TextEditingController _tenderAmt = TextEditingController(text: '0');
+
   int? firstnum;
   int? secondnum;
   double? ptrprice;
@@ -18,6 +25,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
   String? userInput;
   String? result;
   int dotCount = 0;
+  int billNumber = 000000;
   // List of items in our dropdown menu
   var items = [
     'Liter',
@@ -32,6 +40,148 @@ class _DieselCalculationsState extends State<DieselCalculations> {
       result = '';
       dotCount = 0;
     });
+  }
+
+  Future<bool?> _bindingPrinter() async {
+    await SunmiPrinter.initPrinter();
+    final bool? result = await SunmiPrinter.bindingPrinter();
+
+    return result;
+  }
+
+  void printBill(
+      {required String totalPrice,
+      required double rate,
+      required String title,
+      required String quantity}) async {
+    await _bindingPrinter();
+
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    billNumber = int.parse(prefs.getString("billNumber") ?? '000000');
+    setState(() {
+      billNumber++;
+    });
+    var x = (0.13 * double.parse(totalPrice));
+    var tender = double.parse(_tenderAmt.text);
+    if (tender == '') {
+      tender = 0;
+    }
+    var change = double.parse(totalPrice) - tender;
+    var vat = double.parse(totalPrice) - x;
+    var pannumber = prefs.getString("Companypan") ?? '';
+    var companyName = prefs.getString("companyName") ?? '';
+    var companyAddress = prefs.getString("companyAddress") ?? '';
+    var phoneNumber = prefs.getString("phoneNumber") ?? '';
+    var branchnumber = prefs.getString("displaybran") ?? '';
+    var date = intl.DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
+    await SunmiPrinter.initPrinter();
+    await SunmiPrinter.startTransactionPrint(true);
+    await SunmiPrinter.setAlignment(SunmiPrintAlign.CENTER);
+    await SunmiPrinter.printText(companyName,
+        style: SunmiStyle(
+            align: SunmiPrintAlign.CENTER,
+            fontSize: SunmiFontSize.LG,
+            bold: true));
+    await SunmiPrinter.printText(companyAddress,
+        style: SunmiStyle(
+            align: SunmiPrintAlign.CENTER,
+            fontSize: SunmiFontSize.LG,
+            bold: true));
+    await SunmiPrinter.printText('PAN: $pannumber',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.CENTER,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.printText('PH: $phoneNumber',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.CENTER,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.printText('Tax Invoice',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.CENTER,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.printText('Branch: $branchnumber',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.CENTER,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.printText('Bill No: $billNumber',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.LEFT,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.printText('Mode: CASH',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.LEFT,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.line();
+    await SunmiPrinter.printRow(cols: [
+      ColumnMaker(text: 'Item', align: SunmiPrintAlign.LEFT),
+      ColumnMaker(text: 'Qty', align: SunmiPrintAlign.CENTER),
+      ColumnMaker(text: 'Rate', align: SunmiPrintAlign.CENTER),
+      ColumnMaker(text: 'Amount', align: SunmiPrintAlign.RIGHT),
+    ]);
+
+    await SunmiPrinter.line();
+    await SunmiPrinter.printRow(cols: [
+      ColumnMaker(text: title, align: SunmiPrintAlign.LEFT),
+      ColumnMaker(text: '${quantity}L', align: SunmiPrintAlign.CENTER),
+      ColumnMaker(text: '${rate}/L', align: SunmiPrintAlign.CENTER),
+      ColumnMaker(text: x.toStringAsFixed(2), align: SunmiPrintAlign.RIGHT),
+    ]);
+    await SunmiPrinter.printText('TAXABLE',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.printText('Amount: Rs. $vat',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.printText('VAT(13%): Rs. $x',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.printText('Total : Rs.${totalPrice}',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.printText('Tender : Rs.${tender}',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.printText('Change : Rs.${change}',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.line();
+    await SunmiPrinter.printText('**NOTE',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.LEFT,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.printText('Print time : $date',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.LEFT,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.lineWrap(2);
+    await SunmiPrinter.printText('Visit Again , Thank You ',
+        style: SunmiStyle(
+            align: SunmiPrintAlign.LEFT,
+            fontSize: SunmiFontSize.MD,
+            bold: true));
+    await SunmiPrinter.lineWrap(4);
+    await SunmiPrinter.exitTransactionPrint(true);
+    await PostApi.post(
+            billNumber: billNumber,
+            totalPrice: totalPrice,
+            rate: rate,
+            title: title,
+            quantity: quantity)
+        .then((value) => Navigator.pop(context));
   }
 
   void btnclicked(String btnvalue) async {
@@ -177,6 +327,24 @@ class _DieselCalculationsState extends State<DieselCalculations> {
           const SizedBox(
             height: 20,
           ),
+          Container(
+              margin: const EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(20)),
+              height: 50,
+              width: 150,
+              child: TextFormField(
+                controller: _tenderAmt,
+                decoration: const InputDecoration(
+                    hintText: 'Tender Amount',
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.attach_money_rounded)),
+              )),
+          const SizedBox(
+            height: 20,
+          ),
           InkWell(
             onTap: () => showDialog(
                 context: context,
@@ -220,22 +388,16 @@ class _DieselCalculationsState extends State<DieselCalculations> {
                                         color: Colors.teal),
                                     child: TextButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop();
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) {
-                                          return Bill(
-                                            quantity: dropdownvalue == items[0]
-                                                ? (userInput ?? '')
-                                                : (result ?? ''),
-                                            totalPrice:
-                                                dropdownvalue == items[0]
-                                                    ? (result ?? '')
-                                                    : (userInput ?? ''),
-                                            rate: ptrprice!,
-                                            title: widget.title,
-                                          );
-                                        }));
+                                        printBill(
+                                          quantity: dropdownvalue == items[0]
+                                              ? (userInput ?? '')
+                                              : (result ?? ''),
+                                          totalPrice: dropdownvalue == items[0]
+                                              ? (result ?? '')
+                                              : (userInput ?? ''),
+                                          rate: ptrprice!,
+                                          title: 'Diesel',
+                                        );
                                       },
                                       child: const Text(
                                         'Print',
