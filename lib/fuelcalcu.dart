@@ -122,30 +122,30 @@ class _FuelcalcusState extends State<Fuelcalcu> {
     await SunmiPrinter.printRow(cols: [
       ColumnMaker(
         text: 'Item',
-        width: 6,
+        width: 8,
       ),
-      ColumnMaker(text: 'Qty', width: 6),
-      ColumnMaker(text: 'Rate', width: 6),
-      ColumnMaker(text: 'Amount', width: 6),
+      ColumnMaker(text: 'Qty', width: 8),
+      ColumnMaker(text: 'Rate', width: 8),
+      ColumnMaker(text: 'Amount', width: 8),
     ]);
 
     await SunmiPrinter.line();
     await SunmiPrinter.printRow(cols: [
       ColumnMaker(
         text: title,
-        width: 6,
+        width: 8,
       ),
       ColumnMaker(
         text: '${quantity}L',
-        width: 6,
+        width: 8,
       ),
       ColumnMaker(
         text: '${rate}/L',
-        width: 6,
+        width: 8,
       ),
       ColumnMaker(
         text: x.toStringAsFixed(2),
-        width: 6,
+        width: 8,
       ),
     ]);
     await SunmiPrinter.printText('TAXABLE',
