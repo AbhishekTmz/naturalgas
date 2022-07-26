@@ -137,7 +137,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
             align: SunmiPrintAlign.CENTER,
             fontSize: SunmiFontSize.MD,
             bold: true));
-    await SunmiPrinter.printText('Bill No: BA-${dbBillNo + 1}',
+    await SunmiPrinter.printText('Bill No: VAT-${dbBillNo + 1}',
         style: SunmiStyle(
             align: SunmiPrintAlign.LEFT,
             fontSize: SunmiFontSize.MD,
@@ -147,6 +147,8 @@ class _DieselCalculationsState extends State<DieselCalculations> {
             align: SunmiPrintAlign.LEFT,
             fontSize: SunmiFontSize.MD,
             bold: true));
+    await SunmiPrinter.printText('Vehicle No: ${vehicleNo}',
+        style: SunmiStyle(align: SunmiPrintAlign.LEFT, bold: true));
     await SunmiPrinter.line();
     await SunmiPrinter.printRow(cols: [
       ColumnMaker(
@@ -189,10 +191,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
         style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT,
         ));
-    await SunmiPrinter.printText('Vehicle No: ${vehicleNo}',
-        style: SunmiStyle(
-          align: SunmiPrintAlign.RIGHT,
-        ));
+
     await SunmiPrinter.line();
     await SunmiPrinter.printText('**NOTE',
         style: SunmiStyle(
