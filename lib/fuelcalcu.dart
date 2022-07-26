@@ -47,16 +47,18 @@ class _FuelcalcusState extends State<Fuelcalcu> {
   }
 
   final url = "http://103.90.86.196:89/api/Mater/123456789";
-  var dbBillNo = '1';
+  int dbBillNo = 1;
 
   void fetchData() async {
     try {
       final response = await http.get(Uri.parse(url));
       final data = await response.body;
-      print(data);
+      final char = data.split('"');
+
       setState(() {
-        dbBillNo = data;
+        dbBillNo = int.parse(char[1]);
       });
+      print(dbBillNo);
     } catch (err) {
       print(err);
     }
@@ -140,7 +142,7 @@ class _FuelcalcusState extends State<Fuelcalcu> {
             align: SunmiPrintAlign.CENTER,
             fontSize: SunmiFontSize.MD,
             bold: true));
-    await SunmiPrinter.printText('Bill No: BA-${(double.parse(dbBillNo) + 1)}',
+    await SunmiPrinter.printText('Bill No: BA-${dbBillNo + 1}',
         style: SunmiStyle(
             align: SunmiPrintAlign.LEFT,
             fontSize: SunmiFontSize.MD,
@@ -233,7 +235,13 @@ class _FuelcalcusState extends State<Fuelcalcu> {
             rate: rate,
             title: title,
             quantity: quantity)
-        .then((value) => Navigator.pop(context));
+        .then((value) {
+      if (value == 200) {
+        print("Success");
+        fetchData();
+      }
+      Navigator.pop(context);
+    });
   }
 
   void btnclicked(String btnvalue) async {

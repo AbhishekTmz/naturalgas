@@ -65,6 +65,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
       setState(() {
         dbBillNo = int.parse(char[1]);
       });
+      print(dbBillNo);
     } catch (err) {
       print(err);
     }
@@ -102,8 +103,6 @@ class _DieselCalculationsState extends State<DieselCalculations> {
     var companyAddress = prefs.getString("companyAddress") ?? '';
     var phoneNumber = prefs.getString("phoneNumber") ?? '';
     var branchnumber = prefs.getString("displaybran") ?? '';
-    var random = Random().nextInt(1000000);
-
     var date = intl.DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
     await SunmiPrinter.initPrinter();
     await SunmiPrinter.startTransactionPrint(true);
@@ -219,7 +218,13 @@ class _DieselCalculationsState extends State<DieselCalculations> {
             rate: rate,
             title: title,
             quantity: quantity)
-        .then((value) => Navigator.pop(context));
+        .then((value) {
+      if (value == 200) {
+        print("Success");
+        fetchData();
+      }
+      Navigator.pop(context);
+    });
   }
 
   void btnclicked(String btnvalue) async {
