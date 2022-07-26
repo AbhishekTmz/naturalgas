@@ -59,11 +59,13 @@ class _DieselCalculationsState extends State<DieselCalculations> {
   void fetchData() async {
     try {
       final response = await http.get(Uri.parse(url));
+
       final data = await response.body;
       final char = data.split('"');
 
       setState(() {
         dbBillNo = int.parse(char[1]);
+        log(response.statusCode);
       });
     } catch (err) {
       print(err);
