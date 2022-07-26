@@ -24,7 +24,7 @@ class PostApi {
     var x = (0.247 * double.parse(totalPrice));
     var vat = double.parse(totalPrice) - x;
     request.body = json.encode(
-        "Company_Pan:$pannumber,Branch_Code:$branchnumber,BillNo:S0-$billNumber,Bill_dateTime:$date,Product:${title},Qty:${quantity},Rate:${rate},Amount:${vat},Discount:0,Vat:13%,NetAmt:${totalPrice}");
+        "Company_Pan:$pannumber,Branch_Code:$branchnumber,BillNo:${billNumber},Bill_dateTime:${date},Product:${title},Qty:${quantity},Rate:${rate},Amount:${vat},Discount:0,Vat:13%,NetAmt:${totalPrice}");
     request.headers.addAll(headers);
 
     http.StreamedResponse response = await request.send();

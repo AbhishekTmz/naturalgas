@@ -6,6 +6,8 @@ import 'package:sunmi_printer_plus/column_maker.dart';
 import 'package:sunmi_printer_plus/enums.dart';
 import 'package:sunmi_printer_plus/sunmi_printer_plus.dart';
 import 'package:sunmi_printer_plus/sunmi_style.dart';
+import 'dart:math';
+import 'package:http/http.dart' as http;
 
 class DieselCalculations extends StatefulWidget {
   const DieselCalculations({Key? key, required this.title}) : super(key: key);
@@ -18,6 +20,8 @@ class DieselCalculations extends StatefulWidget {
 class _DieselCalculationsState extends State<DieselCalculations> {
   TextEditingController _tenderAmt = TextEditingController(text: '0');
 
+  TextEditingController _vehicleNo = TextEditingController(text: '000000');
+
   int? firstnum;
   int? secondnum;
   double? ptrprice;
@@ -25,7 +29,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
   String? userInput;
   String? result;
   int dotCount = 0;
-  int billNumber = 000000;
+  int billNumber = Random().nextInt(1000);
   // List of items in our dropdown menu
   var items = [
     'Liter',
@@ -49,6 +53,29 @@ class _DieselCalculationsState extends State<DieselCalculations> {
     return result;
   }
 
+  final url = "http://103.90.86.196:89/api/Mater/123456789";
+  int dbBillNo = 1;
+
+  void fetchData() async {
+    try {
+      final response = await http.get(Uri.parse(url));
+      final data = await response.body;
+      final char = data.split('"');
+
+      setState(() {
+        dbBillNo = int.parse(char[1]);
+      });
+    } catch (err) {
+      print(err);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
   void printBill(
       {required String totalPrice,
       required double rate,
@@ -57,14 +84,16 @@ class _DieselCalculationsState extends State<DieselCalculations> {
     await _bindingPrinter();
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    billNumber = int.parse(prefs.getString("billNumber") ?? '000000');
-    setState(() {
-      billNumber++;
-    });
+    billNumber = Random().nextInt(10000);
+
     var x = (0.13 * double.parse(totalPrice));
     var tender = double.parse(_tenderAmt.text);
     if (tender == '') {
       tender = 0;
+    }
+    var vehicleNo = _tenderAmt.text;
+    if (vehicleNo == '') {
+      vehicleNo = '000000';
     }
     var change = double.parse(totalPrice) - tender;
     var vat = double.parse(totalPrice) - x;
@@ -73,6 +102,8 @@ class _DieselCalculationsState extends State<DieselCalculations> {
     var companyAddress = prefs.getString("companyAddress") ?? '';
     var phoneNumber = prefs.getString("phoneNumber") ?? '';
     var branchnumber = prefs.getString("displaybran") ?? '';
+    var random = Random().nextInt(1000000);
+
     var date = intl.DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
     await SunmiPrinter.initPrinter();
     await SunmiPrinter.startTransactionPrint(true);
@@ -80,12 +111,12 @@ class _DieselCalculationsState extends State<DieselCalculations> {
     await SunmiPrinter.printText(companyName,
         style: SunmiStyle(
             align: SunmiPrintAlign.CENTER,
-            fontSize: SunmiFontSize.LG,
+            fontSize: SunmiFontSize.MD,
             bold: true));
     await SunmiPrinter.printText(companyAddress,
         style: SunmiStyle(
             align: SunmiPrintAlign.CENTER,
-            fontSize: SunmiFontSize.LG,
+            fontSize: SunmiFontSize.MD,
             bold: true));
     await SunmiPrinter.printText('PAN: $pannumber',
         style: SunmiStyle(
@@ -107,7 +138,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
             align: SunmiPrintAlign.CENTER,
             fontSize: SunmiFontSize.MD,
             bold: true));
-    await SunmiPrinter.printText('Bill No: $billNumber',
+    await SunmiPrinter.printText('Bill No: BA-${dbBillNo + 1}',
         style: SunmiStyle(
             align: SunmiPrintAlign.LEFT,
             fontSize: SunmiFontSize.MD,
@@ -135,11 +166,11 @@ class _DieselCalculationsState extends State<DieselCalculations> {
       ColumnMaker(text: '${rate}/L', width: 8),
       ColumnMaker(text: x.toStringAsFixed(2), width: 8),
     ]);
-    await SunmiPrinter.printText('TAXABLE',
-        style: SunmiStyle(
-          align: SunmiPrintAlign.RIGHT,
-        ));
-    await SunmiPrinter.printText('Amount: Rs. $vat',
+    // await SunmiPrinter.printText('TAXABLE',
+    //     style: SunmiStyle(
+    //       align: SunmiPrintAlign.RIGHT,
+    //     ));
+    await SunmiPrinter.printText('Taxable Amt: Rs. $vat',
         style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT,
         ));
@@ -147,15 +178,19 @@ class _DieselCalculationsState extends State<DieselCalculations> {
         style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT,
         ));
-    await SunmiPrinter.printText('Total : Rs.${totalPrice}',
+    await SunmiPrinter.printText('Total: Rs.${totalPrice}',
         style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT,
         ));
-    await SunmiPrinter.printText('Tender : Rs.${tender}',
+    await SunmiPrinter.printText('Tender: Rs.${tender}',
         style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT,
         ));
-    await SunmiPrinter.printText('Change : Rs.${change}',
+    await SunmiPrinter.printText('Change: Rs.${change}',
+        style: SunmiStyle(
+          align: SunmiPrintAlign.RIGHT,
+        ));
+    await SunmiPrinter.printText('Vehicle No: ${vehicleNo}',
         style: SunmiStyle(
           align: SunmiPrintAlign.RIGHT,
         ));
@@ -163,23 +198,23 @@ class _DieselCalculationsState extends State<DieselCalculations> {
     await SunmiPrinter.printText('**NOTE',
         style: SunmiStyle(
             align: SunmiPrintAlign.LEFT,
-            fontSize: SunmiFontSize.MD,
+            fontSize: SunmiFontSize.SM,
             bold: true));
     await SunmiPrinter.printText('Print time : $date',
         style: SunmiStyle(
             align: SunmiPrintAlign.LEFT,
-            fontSize: SunmiFontSize.MD,
+            fontSize: SunmiFontSize.SM,
             bold: true));
     await SunmiPrinter.lineWrap(2);
     await SunmiPrinter.printText('Visit Again , Thank You ',
         style: SunmiStyle(
             align: SunmiPrintAlign.LEFT,
-            fontSize: SunmiFontSize.MD,
+            fontSize: SunmiFontSize.SM,
             bold: true));
     await SunmiPrinter.lineWrap(4);
     await SunmiPrinter.exitTransactionPrint(true);
     await PostApi.post(
-            billNumber: billNumber,
+            billNumber: dbBillNo + 1,
             totalPrice: totalPrice,
             rate: rate,
             title: title,
@@ -241,7 +276,7 @@ class _DieselCalculationsState extends State<DieselCalculations> {
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.teal,
-          title: Text(widget.title),
+          title: Text('${widget.title}'),
           actions: [
             DropdownButton(
               value: dropdownvalue,
@@ -344,6 +379,24 @@ class _DieselCalculationsState extends State<DieselCalculations> {
                     hintText: 'Tender Amount',
                     border: InputBorder.none,
                     prefixIcon: Icon(Icons.attach_money_rounded)),
+              )),
+          const SizedBox(
+            height: 20,
+          ),
+          Container(
+              margin: const EdgeInsets.symmetric(horizontal: 30),
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(20)),
+              height: 50,
+              width: 150,
+              child: TextFormField(
+                controller: _vehicleNo,
+                decoration: const InputDecoration(
+                    hintText: 'Vehicle Number',
+                    border: InputBorder.none,
+                    prefixIcon: Icon(Icons.car_repair_outlined)),
               )),
           const SizedBox(
             height: 20,
